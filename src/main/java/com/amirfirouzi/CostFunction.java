@@ -1,3 +1,5 @@
+package com.amirfirouzi;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +25,7 @@ public class CostFunction {
     int crosscut = 0;
     float violation = 0;
     this.selection = selection;
-    this.partitions = new HashMap<>();
+    this.partitions = new HashMap();
     List<Integer> internal = new ArrayList();
     List<Integer> loadR1 = new ArrayList();
     List<Integer> loadR2 = new ArrayList();
@@ -105,7 +107,7 @@ public class CostFunction {
   //gets an array of ints
   //returns a collection containing nonzero elements with its position in the array(column number)
   private Map<Integer, Integer> nonZeros(int[] array) {
-    Map<Integer, Integer> result = new HashMap<>();
+    Map<Integer, Integer> result = new HashMap();
     for (int i = 0; i < array.length; i++) {
       if (array[i] != 0)
         result.put(array[i], i);
