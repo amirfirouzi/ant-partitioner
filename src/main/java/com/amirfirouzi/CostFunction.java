@@ -55,7 +55,7 @@ public class CostFunction {
     //alpha: effect of load on cost
     float alpha = 1.2f;
     //beta: effect of crosscut on cost
-    float beta = 1.5f;
+    float beta = 2f;
 
     //ToDo: V0(Value of unselected)
     float z = (alpha * violation) + (beta * crosscut);

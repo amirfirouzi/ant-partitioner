@@ -33,19 +33,19 @@ public class Model {
 //    ===============
 //    Available Resources(type 1) by Machines
 //    M1=randi([50 1000],1,nMachines);
-    M1 = new int[]{400, 200, 300};
+    M1 = new int[]{500, 200, 300};
 
 //    Available Resources(type 2) by Machines
 //    M2=randi([200 4000],1,nMachines);
-    M2 = new int[]{2000, 4000, 8000};
+    M2 = new int[]{400, 800, 700};
 
 //    Adjacency Matrix containing communicational links with weights
-    Adjacency=new int[nTasks][nTasks];
+    Adjacency = new int[nTasks][nTasks];
     Adjacency[0][2] = 10;
     Adjacency[0][3] = 7;
     Adjacency[1][3] = 12;
     //
-    Adjacency[1][2] = 13;
+    //Adjacency[1][2] = 13;
     Adjacency[2][4] = 20;
     Adjacency[3][4] = 15;
   }
