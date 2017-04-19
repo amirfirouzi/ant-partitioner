@@ -35,16 +35,22 @@ public class CostFunction {
     for (int i = 0; i < model.getnMachines(); i++) {
       List<Integer> partitionTasks = find(selection, i);
       partitions.put(i, partitionTasks);
-      internal.add(InternalCommunication(partitionTasks, model.getAdjacency()));
-      loadR1.add(InternalLoad(partitionTasks, model.getR1()));
-      loadR2.add(InternalLoad(partitionTasks, model.getR2()));
-      crosscut += ExternalCommunication(partitionTasks, model.getAdjacency());
+      if (partitionTasks.size() != 0) {
+        internal.add(InternalCommunication(partitionTasks, model.getAdjacency()));
+        loadR1.add(InternalLoad(partitionTasks, model.getR1()));
+        loadR2.add(InternalLoad(partitionTasks, model.getR2()));
+        crosscut += ExternalCommunication(partitionTasks, model.getAdjacency());
 
-      if (loadR1.get(i) > capacityR1[i] * LTR1) {
-        violation += (loadR1.get(i) / (capacityR1[i] * LTR1)) - 1;
-      }
-      if (loadR2.get(i) > capacityR2[i] * LTR2) {
-        violation += (loadR2.get(i) / (capacityR2[i] * LTR2)) - 1;
+        if (loadR1.get(i) > capacityR1[i] * LTR1) {
+          violation += ((loadR1.get(i) / (capacityR1[i] * LTR1)) - 1) * 100;
+        }
+        if (loadR2.get(i) > capacityR2[i] * LTR2) {
+          violation += ((loadR2.get(i) / (capacityR2[i] * LTR2)) - 1) * 100;
+        }
+      } else {
+        internal.add(0);
+        loadR1.add(0);
+        loadR2.add(0);
       }
     }
 
@@ -53,7 +59,7 @@ public class CostFunction {
     // but if it's imbalanced make some negative effects on violation
 
     //alpha: effect of load on cost
-    float alpha = 1.2f;
+    float alpha = 1.5f;
     //beta: effect of crosscut on cost
     float beta = 2f;
 

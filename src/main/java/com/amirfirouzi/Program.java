@@ -12,18 +12,18 @@ import java.util.Random;
  */
 public class Program {
   public static void main(String[] args) {
-    Model model = new Model(5, 3);
+    Model3 model = new Model3(6, 3);
 
 
     //region ACO Parameters
-    int maxIt = 500;      // Maximum Number of Iterations
+    int maxIt = 100;      // Maximum Number of Iterations
     int nAnt = 50;        // Number of Ants (Population Size)
     int Q = 1;
 
     int tau0 = 1;         // Initial Pheromone
-    float alpha = 0.5f;        // Pheromone Exponential Weight
+    float alpha = 1;        // Pheromone Exponential Weight
     float beta = 0.2f;       // Heuristic Exponential Weight
-    float rho = 0.15f;       // Evaporation Rate
+    float rho = 0.05f;       // Evaporation Rate
     //endregion
 
 
@@ -35,6 +35,7 @@ public class Program {
 //    fillArray(tau, 1);
     float[] bestCosts = new float[maxIt];
     String[] bestSelections = new String[maxIt];
+
     float bestCost = -1;
     int bestAnt = -1;
     int[] ants = new int[nAnt];
@@ -62,22 +63,25 @@ public class Program {
 
           int selectionCandidate = RouletteWheelSelection(p);
           antSelections[ant][level] = selectionCandidate;
-        }
+        }//end level Loop
+
         // Calculate the cost
         float cost = costObject.CalculateCost(antSelections[ant]);
 
         // Update the records if it improves the solution
-        if (bestCost == -1 || bestAnt == -1) {
-          bestAnt = ant;
+        if (bestCost == -1)
           bestCost = cost;
-        }
+
+        if (bestAnt == -1)
+          bestAnt = ant;
         antCosts[ant] = cost;
         if (cost <= bestCost) {
           bestAnt = ant;
           bestCost = cost;
         }
 
-      }
+      }//end Ant Loop
+
       // Update Phromones
       // Move Ants
       for (int ant = 0; ant < nAnt; ant++) {
@@ -96,13 +100,14 @@ public class Program {
 
       // Show Iteration Information
       System.out.println("Iteration: " + it + " Selection= " + bestSelections[it] + " Cost= " + bestCosts[it]);
-      System.out.println(" Best Selection= " + arrayToString(antSelections[bestAnt]) + " Cost= " + bestCost);
 
-    }
+    }//end Iteration
+    System.out.println("\n-------------\n");
 
+    int index = findLatestMinimum(bestCosts);
+    System.out.println("Best Answer:\n Iteration: " + index + " Selection= " + bestSelections[index] + " Cost= " + bestCosts[index]);
 //    int[] selection = new int[]{0, 1, 0, 1, 0};
     //endregion
-
 
   }
 
@@ -144,5 +149,17 @@ public class Program {
     for (int i = 0; i < array.length; i++) {
       Arrays.fill(array[i], value);
     }
+  }
+
+  public static int findLatestMinimum(float[] array) {
+    float min = -1;
+    int index = -1;
+    for (int i = array.length - 1; i >= 0; i--) {
+      if (array[i] < min || (min == -1 && index == -1)) {
+        min = array[i];
+        index = i;
+      }
+    }
+    return index;
   }
 }
