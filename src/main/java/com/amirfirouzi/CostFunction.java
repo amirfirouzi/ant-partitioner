@@ -1,5 +1,7 @@
 package com.amirfirouzi;
 
+import com.amirfirouzi.models.Model;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,11 @@ public class CostFunction {
     this.model = model;
   }
 
-  public float CalculateCost(int[] selection) {
+  public enum costMode {
+    BestCut, LoadBalanced;
+  }
+
+  public float CalculateCost(int[] selection, costMode mode) {
     //Load Threshold for Resources type 1(CPU) & 2(RAM)
     float LTR1 = 1.0f;
     float LTR2 = 0.9f;
@@ -41,6 +47,7 @@ public class CostFunction {
         loadR2.add(InternalLoad(partitionTasks, model.getR2()));
         crosscut += ExternalCommunication(partitionTasks, model.getAdjacency());
 
+        //Add to Cost if selection violates the usage of Resources(more that capacity)
         if (loadR1.get(i) > capacityR1[i] * LTR1) {
           violation += ((loadR1.get(i) / (capacityR1[i] * LTR1)) - 1) * 100;
         }
@@ -52,6 +59,12 @@ public class CostFunction {
         loadR1.add(0);
         loadR2.add(0);
       }
+    }
+
+    for (int i = 0; i < model.getnMachines(); i++) {
+      List<Integer> loadDiffR1 = new ArrayList();
+      List<Integer> loadDiffR2 = new ArrayList();
+
     }
 
     //ToDo: Effect of Load Imbalance between different partitions

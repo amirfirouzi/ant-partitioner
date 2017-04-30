@@ -1,4 +1,4 @@
-package com.amirfirouzi;
+package com.amirfirouzi.models;
 
 /**
  * Created by amir on 4/15/17.

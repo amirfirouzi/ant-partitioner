@@ -1,5 +1,6 @@
 package com.amirfirouzi;
 
+import com.amirfirouzi.models.*;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.ops.transforms.Transforms;
@@ -12,8 +13,8 @@ import java.util.Random;
  */
 public class Program {
   public static void main(String[] args) {
-    Model3 model = new Model3(6, 3);
-
+    Model4 model = new Model4(8, 3);
+    CostFunction.costMode mode= CostFunction.costMode.BestCut;
 
     //region ACO Parameters
     int maxIt = 100;      // Maximum Number of Iterations
@@ -66,7 +67,7 @@ public class Program {
         }//end level Loop
 
         // Calculate the cost
-        float cost = costObject.CalculateCost(antSelections[ant]);
+        float cost = costObject.CalculateCost(antSelections[ant], mode);
 
         // Update the records if it improves the solution
         if (bestCost == -1)
