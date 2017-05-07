@@ -18,6 +18,7 @@ public class CostFunction {
     }
 
     public enum costMode {
+        //ToDo: add more modes and write code to effect the behaviour of CostFunction
         BestCut, LoadBalanced;
     }
 
@@ -30,7 +31,7 @@ public class CostFunction {
         float violation = 0;
         this.selection = selection;
         this.partitions = new HashMap();
-        List<Integer> internal = new ArrayList();
+        //List<Integer> internal = new ArrayList();
         List<Integer> loadR1 = new ArrayList();
         List<Integer> loadR2 = new ArrayList();
         int[] capacityR1 = model.getM1();
@@ -40,7 +41,7 @@ public class CostFunction {
             List<Integer> partitionTasks = find(selection, i);
             partitions.put(i, partitionTasks);
             if (partitionTasks.size() != 0) {
-                internal.add(InternalCommunication(partitionTasks, model.getAdjacency()));
+                //internal.add(InternalCommunication(partitionTasks, model.getAdjacency()));
                 loadR1.add(InternalLoad(partitionTasks, model.getR1()));
                 loadR2.add(InternalLoad(partitionTasks, model.getR2()));
                 crosscut += ExternalCommunication(partitionTasks, model.getAdjacency());
@@ -53,7 +54,7 @@ public class CostFunction {
                     violation += ((loadR2.get(i) / (capacityR2[i] * LTR2)) - 1) * 100;
                 }
             } else {
-                internal.add(0);
+                //internal.add(0);
                 loadR1.add(0);
                 loadR2.add(0);
             }
@@ -74,7 +75,6 @@ public class CostFunction {
         //beta: effect of crosscut on cost
         float beta = 2f;
 
-        //ToDo: V0(Value of unselected)
         //ToDo: effect of InternalCommunication(calculated but not used)
         double z = (alpha * violation) + (beta * crosscut);
 
