@@ -4,21 +4,23 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.ops.transforms.Transforms;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
  * Created by amir on 4/15/17.
  */
 public class Partitioner {
-    public static void main(String[] args) throws Exception {
+    public static PartitioningResult doPartition(boolean verbose) throws Exception {
         long startTime = System.currentTimeMillis();
         ModelGenerator modelGenerator = new ModelGenerator();
-        Model model = modelGenerator.getModel4();
+        Model model = modelGenerator.getModel1();
         CostFunction.costMode mode = CostFunction.costMode.BestCut;
 
         //region ACO Parameters
-        int maxIt = 200;      // Maximum Number of Iterations
+        int maxIt = 100;      // Maximum Number of Iterations
         int nAnt = 50;        // Number of Ants (Population Size)
         int Q = 1;
 
@@ -28,32 +30,31 @@ public class Partitioner {
         float rho = 0.05f;       // Evaporation Rate
         //endregion
 
-
         //region Initialization
         //ToDo: Heuristic Information
         // eta
 //    float[][] tau = new float[model.getnMachines()][model.getnTasks()];
         INDArray tau = Nd4j.ones(model.getnMachines(), model.getnTasks());
 //    fillArray(tau, 1);
-        float[] bestCosts = new float[maxIt];
-        String[] bestSelections = new String[maxIt];
+        List<CostResult> bestResults = new ArrayList<CostResult>();
+//        int[][] bestSelections = new int[maxIt][];
 
-        float bestCost = -1;
+        CostResult costResult;
+        CostResult bestCost;
         int bestAnt = -1;
         int[] ants = new int[nAnt];
-        float[] antCosts = new float[nAnt];
+        double[] antCosts = new double[nAnt];
         int[][] antSelections = new int[nAnt][model.getnTasks()];
         CostFunction costObject = new CostFunction(model);
 
         //endregion
-
 
         //region ACO Main Loop
 
         // iteration loop
         for (int it = 0; it < maxIt; it++) {
             // Move Ants
-            bestCost = -1;
+            bestCost = null;
             bestAnt = -1;
             for (int ant = 0; ant < nAnt; ant++) {
                 //ToDo: empty current ant's Selection
@@ -68,20 +69,20 @@ public class Partitioner {
                 }//end level Loop
 
                 // Calculate the cost
-                float cost = costObject.CalculateCost(antSelections[ant], mode);
+                costResult = costObject.CalculateCost(antSelections[ant], mode);
+                double cost = costResult.getCost();
 
                 // Update the records if it improves the solution
-                if (bestCost == -1)
-                    bestCost = cost;
+                if (bestCost == null)
+                    bestCost = new CostResult(costResult.getLoadR1(), costResult.getLoadR2(), costResult.getCrosscut(), antSelections[ant], cost);
 
                 if (bestAnt == -1)
                     bestAnt = ant;
                 antCosts[ant] = cost;
-                if (cost <= bestCost) {
+                if (cost <= bestCost.getCost()) {
                     bestAnt = ant;
-                    bestCost = cost;
+                    bestCost = costResult;
                 }
-
             }//end Ant Loop
 
             // Update Phromones
@@ -96,26 +97,34 @@ public class Partitioner {
             // Evaporation
             tau.muli((1 - rho));
 
-            // Store Best Cost & Best Selectin
-            bestCosts[it] = bestCost;
-            bestSelections[it] = arrayToString(antSelections[bestAnt]);
+            // Store Best Cost & Best Selection
+            bestResults.add(bestCost);
+//            bestSelections[it] = antSelections[bestAnt];
 
             // Show Iteration Information
-            System.out.println("Iteration: " + it + " Selection= " + bestSelections[it] + " Cost= " + bestCosts[it]);
+            if (verbose)
+                System.out.println("Iteration: " + it + " Selection= " + arrayToString(bestResults.get(it).getSelection())
+                        + " Cost= " + bestResults.get(it).getCost());
 
         }//end Iteration
-        System.out.println("\n-------------\n");
 
-        int index = findLatestMinimum(bestCosts);
+        //find index of bestResult(Generally)
+        int index = findLatestMinimum(bestResults);
 
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
+        float usedMemory = ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (float) (1024 * 1024));
+        CostResult bestOfTheBest = bestResults.get(index);
+        PartitioningResult answer = new PartitioningResult(totalTime,usedMemory, index, bestOfTheBest.getLoadR1(), bestOfTheBest.getLoadR2(), bestOfTheBest.getCrosscut(), bestOfTheBest.getSelection(), bestOfTheBest.getCost());
+        if (verbose) {
+            System.out.println("\n-------------\n");
+            System.out.println("Best Answer:\n Iteration: " + index + " Selection= " + arrayToString(bestOfTheBest.getSelection()) + " Cost= " + bestOfTheBest.getCost());
+            System.out.println("time: " + (totalTime));
+            System.out.println("used Mem: " + usedMemory);
 
-        System.out.println("Best Answer:\n Iteration: " + index + " Selection= " + bestSelections[index] + " Cost= " + bestCosts[index]);
-        System.out.println("time: " + (totalTime));
+        }
         //endregion
-
-
+        return answer;
     }
 
     public static int RouletteWheelSelection(INDArray p) {
@@ -158,12 +167,12 @@ public class Partitioner {
         }
     }
 
-    public static int findLatestMinimum(float[] array) {
-        float min = -1;
+    public static int findLatestMinimum(List<CostResult> array) {
+        double min = -1;
         int index = -1;
-        for (int i = array.length - 1; i >= 0; i--) {
-            if (array[i] < min || (min == -1 && index == -1)) {
-                min = array[i];
+        for (int i = array.size() - 1; i >= 0; i--) {
+            if (array.get(i).getCost() < min || (min == -1 && index == -1)) {
+                min = array.get(i).getCost();
                 index = i;
             }
         }

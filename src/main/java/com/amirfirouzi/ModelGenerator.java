@@ -2,6 +2,8 @@ package com.amirfirouzi;
 
 import com.amirfirouzi.Model;
 
+import java.util.Random;
+
 /**
  * Created by amir on 5/7/17.
  */
@@ -108,5 +110,28 @@ public class ModelGenerator {
         return model4;
     }
 
+    public Model getModel5() throws Exception {
+        R1 = new int[]{100, 150, 200, 150, 150, 200, 200, 150, 200, 100, 100, 150, 200, 150, 150, 200, 200, 150, 200, 100};
+        R2 = new int[]{150, 150, 100, 150, 100, 200, 200, 200, 150, 200, 150, 150, 100, 150, 100, 200, 200, 200, 150, 200};
 
+        M1 = new int[]{500, 300, 600, 400, 300, 600, 400, 300, 500, 700};
+        M2 = new int[]{500, 300, 700, 300, 600, 400, 300, 500, 400, 300};
+
+        int nTasks = R1.length;
+        Adjacency = new int[nTasks][nTasks];
+
+        for (int i = 0; i < nTasks; i++) {
+            for (int j = 0; j < nTasks; j++) {
+                if ((i < j)) {
+                    if (Math.round(Math.random() * 1) == 1)
+                        Adjacency[i][j] = 1;
+                    else
+                        Adjacency[i][j] = 0;
+                }
+
+            }
+        }
+        Model model5 = new Model(R1, R2, M1, M2, Adjacency);
+        return model5;
+    }
 }
